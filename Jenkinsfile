@@ -9,11 +9,6 @@ pipeline {
   }
 
   stages {
-    stage('Checkout') {
-      steps {
-        checkout scm
-      }
-    }
     stage('Build and Push Docker Image') {
       agent {
         kubernetes {
@@ -43,6 +38,9 @@ pipeline {
         }
         environment {
           PATH = "/busybox:/kaniko:$PATH"
+        }
+        steps {
+          checkout scm
         }
         steps {
           container(name: 'kaniko', shell: '/busybox/sh') {
