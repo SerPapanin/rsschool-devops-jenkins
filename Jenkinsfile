@@ -7,7 +7,13 @@ pipeline {
       IMAGE_TAG = 'latest' // Replace with your desired image tag
       AWS_ECR_REPOSITORY_URI = "${env.AWS_ACCOUNT_ID}.dkr.ecr.${env.AWS_REGION}.amazonaws.com/${env.AWS_ECR_REPOSITORY_NAME}"
   }
+
   stages {
+    stage('Checkout') {
+      steps {
+        checkout scm
+      }
+    }
     stage('Build and Push Docker Image') {
       agent {
         kubernetes {
