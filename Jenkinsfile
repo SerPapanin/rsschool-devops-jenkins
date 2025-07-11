@@ -3,9 +3,10 @@ pipeline {
   environment {
       AWS_REGION = 'us-east-1' // Replace with your AWS region
       AWS_ACCOUNT_ID = '837781915459' // Replace with your AWS Account ID
-      AWS_ECR_REPOSITORY_NAME = 'rs-school/app-cloud-pub' // Replace with your ECR repository name
+      AWS_ECR_REPOSITORY_NAME = 'public.ecr.aws/r1y0l6v8/rs-school/app-cloud-pub' // Replace with your ECR repository name
       IMAGE_TAG = 'latest' // Replace with your desired image tag
-      AWS_ECR_REPOSITORY_URI = "${env.AWS_ACCOUNT_ID}.dkr.ecr.${env.AWS_REGION}.amazonaws.com/${env.AWS_ECR_REPOSITORY_NAME}"
+      #AWS_ECR_REPOSITORY_URI = "${env.AWS_ACCOUNT_ID}.dkr.ecr.${env.AWS_REGION}.amazonaws.com/${env.AWS_ECR_REPOSITORY_NAME}"
+      AWS_ECR_REPOSITORY_URI = 'public.ecr.aws/r1y0l6v8/rs-school/app-cloud-pub'
   }
 
   stages {
