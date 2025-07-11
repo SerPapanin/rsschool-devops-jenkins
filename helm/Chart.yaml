@@ -1,0 +1,9 @@
+apiVersion: v2
+name: app-cloud
+description: A Helm chart for Flask application rs-school
+
+type: application
+
+version: 0.1.1
+
+appVersion: "1.0.1"

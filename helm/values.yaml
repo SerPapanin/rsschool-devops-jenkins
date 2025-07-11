@@ -1,0 +1,9 @@
+namespace: test
+app: flask-app
+host: flask-app.panin.lab
+test-app:
+  image:
+    repository: 837781915459.dkr.ecr.us-east-1.amazonaws.com/rs-school/app-cloud
+    tag: latest
+  replicas: 1
+  port: 8080
