@@ -3,7 +3,7 @@ pipeline {
   environment {
       AWS_REGION = 'us-east-1' // Replace with your AWS region
       AWS_ACCOUNT_ID = '837781915459' // Replace with your AWS Account ID
-      AWS_ECR_REPOSITORY_NAME = 'rs-school/app-cloud' // Replace with your ECR repository name
+      AWS_ECR_REPOSITORY_NAME = 'rs-school/app-cloud-pub' // Replace with your ECR repository name
       IMAGE_TAG = 'latest' // Replace with your desired image tag
       AWS_ECR_REPOSITORY_URI = "${env.AWS_ACCOUNT_ID}.dkr.ecr.${env.AWS_REGION}.amazonaws.com/${env.AWS_ECR_REPOSITORY_NAME}"
   }
