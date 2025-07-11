@@ -40,12 +40,9 @@ pipeline {
           PATH = "/busybox:/kaniko:$PATH"
         }
         steps {
-          checkout scm
-        }
-        steps {
           container(name: 'kaniko', shell: '/busybox/sh') {
               sh '''#!/busybox/sh
-              /kaniko/executor --dockerfile=Dockerfile --context=/tmp/jenkins/workspace/test --destination=$AWS_ECR_REPOSITORY_URI:$IMAGE_TAG --verbosity debug
+              /kaniko/executor --dockerfile=Dockerfile --context=/tmp/jenkins/workspace/app-cloud --destination=$AWS_ECR_REPOSITORY_URI:$IMAGE_TAG --verbosity debug
               '''
           }
         }
