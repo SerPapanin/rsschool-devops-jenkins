@@ -1,20 +1,46 @@
 ## Task 5 documentation
 
-Application docker image build and push the application to ECR private repository by Jenkins job
+Application docker image build and push to ECR private repository by Jenkins job
 
 ### Application deployment to K3S by using Helm.
-1. Need to prepare cluster for deployment.
-2. Create namespace for application deployment.
-```
-kubectl create namespace test
-```
-3. Create secret for ECR authentication.
-```
-kubectl create secret docker-registry regcred \
---docker-server=https://<your-ecr-url> \
---docker-username=<your-ecr-username> --docker-password=<your-ecr-password> --docker-email=<your-email>
-```
-4. Deploy application by Helm chart.
-```
-helm upgrade --install flask-app ./helm
-```
+
+## Prepare the Cluster
+1. **Create Namespace:**
+
+    ```bash
+    kubectl create namespace test
+    ```
+2. **Create secret for ECR authentication.**
+
+    ```bash
+    kubectl create secret docker-registry regcred \
+            --docker-server=https://<your-ecr-url> \
+            --docker-username=<your-ecr-username> \
+            --docker-password=<your-ecr-password> \
+            --docker-email=<your-email>
+    ```
+3. **Deploy Application using Helm**
+
+    ```bash
+    helm upgrade --install flask-app ./helm
+    ```
+
+2. **Verify WordPress installation:**
+
+    ```bash
+    kubectl get pods -n test
+    kubectl get deployments -n test
+    kubectl get services -n test
+    ```
+    Ensure all pods are running.
+
+3. **Visit Application in the browser**
+
+    Add to your hosts file:
+    ```
+    <bastionhostIP> flask-app.panin.lab
+    ```
+    # for HTTP
+    http://flask-app.panin.lab
+
+## Clean Up
