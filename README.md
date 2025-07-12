@@ -35,8 +35,9 @@ Application docker image build and push to ECR private repository by Jenkins job
     Ensure all pods are running.
 
 3. **Visit Application in the browser**
+    Application exposed by traefik ingress controller on k3S cluster and nginx reverse proxy on Bastion host that forwards traffic to the application.
 
-    Add to your hosts file:
+    Due absent public domain name need to add to your hosts file this text:
     ```
     <bastionhostIP> flask-app.panin.lab
     ```
