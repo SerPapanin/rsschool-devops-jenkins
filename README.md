@@ -43,5 +43,6 @@ Application docker image build and push to ECR private repository by Jenkins job
     ```
     # for HTTP
     http://flask-app.panin.lab
+    [image](https://raw.githubusercontent.com/SerPapanin/rsschool-devops-jenkins/refs/heads/main/screenshots/http_access.png)
 
 ## Clean Up
