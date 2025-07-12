@@ -6,7 +6,7 @@ metadata:
   labels:
     app: {{ .Values.app }}
 spec:
-  replicas: {{ .Values.test-app.replicas }}
+  replicas: {{ .Values.test_app.replicas }}
   selector:
     matchLabels:
       app: {{ .Values.app }}
@@ -18,7 +18,7 @@ spec:
         app: {{ .Values.app }}
     spec:
       containers:
-      - image: {{ .Values.test-app.image.repository }}:{{ .Values.test-app.image.tag }}
+      - image: {{ .Values.test_app.image.repository }}:{{ .Values.test_app.image.tag }}
         name: {{ .Values.app }}
         ports:
-          - containerPort: {{ .Values.test-app.port }}
+          - containerPort: {{ .Values.test_app.port }}

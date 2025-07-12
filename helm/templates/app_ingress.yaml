@@ -21,4 +21,4 @@ spec:
               service:
                 name: {{ .Values.app }}
                 port:
-                  number: {{ .Values.test-app.port }}
+                  number: {{ .Values.test_app.port }}
