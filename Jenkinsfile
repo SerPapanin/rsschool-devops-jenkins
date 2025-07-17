@@ -9,26 +9,26 @@ pipeline {
             spec:
             containers:
             - name: jnlp
-                workingDir: /tmp/jenkins
+              workingDir: /tmp/jenkins
             - name: kaniko
-                workingDir: /tmp/jenkins
-                image: gcr.io/kaniko-project/executor:debug
-                imagePullPolicy: Always
-                command:
-                - /busybox/cat
-                tty: true
+              workingDir: /tmp/jenkins
+              image: gcr.io/kaniko-project/executor:debug
+              imagePullPolicy: Always
+              command:
+              - /busybox/cat
+              tty: true
             - name: helm
-                workingDir: /tmp/jenkins
-                image: alpine/helm:3.18.3
-                command:
-                - cat
-                tty: true
+              workingDir: /tmp/jenkins
+              image: alpine/helm:3.18.3
+              command:
+              - cat
+              tty: true
             - name: devops
-                workingDir: /tmp/jenkins
-                image: papanin123/aws-cli-kubectl-helm:latest
-                command:
-                - cat
-                tty: true
+              workingDir: /tmp/jenkins
+              image: papanin123/aws-cli-kubectl-helm:latest
+              command:
+              - cat
+              tty: true
             """
     }
   }
