@@ -4,8 +4,6 @@ pipeline {
         yaml """
             apiVersion: v1
             kind: Pod
-            metadata:
-            name: kaniko
             spec:
             containers:
             - name: jnlp
@@ -19,7 +17,7 @@ pipeline {
               tty: true
             - name: devops
               workingDir: /tmp/jenkins
-              image: papanin123/aws-cli-kubectl-helm:latest
+              image: amazon/aws-cli:2.15.3
               command:
               - cat
               tty: true
