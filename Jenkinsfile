@@ -6,25 +6,25 @@ pipeline {
         kind: Pod
         spec:
         containers:
-            - name: jnlp
-            image: jenkins/inbound-agent
-            workingDir: /home/jenkins/agent
-            - name: buildx
-            image: papanin123/buildx:latest
-            workingDir: /workspace
-            command:
-            - /busybox/cat
-            tty: true
-            - name: deploy
-            image: amazon/aws-cli:2.15.3
-            workingDir: /workspace
-            command:
-            - sleep
-            args:
-            - infinity
-            env:
-            - name: AWS_REGION
-              value: us-east-1
+        - name: jnlp
+          image: jenkins/inbound-agent
+          workingDir: /home/jenkins/agent
+        - name: buildx
+          image: papanin123/buildx:latest
+          workingDir: /workspace
+          command:
+          - /busybox/cat
+          tty: true
+        - name: deploy
+          image: amazon/aws-cli:2.15.3
+          workingDir: /workspace
+          command:
+          - sleep
+          args:
+          - infinity
+          env:
+          - name: AWS_REGION
+            value: us-east-1
         """
     }
   }
