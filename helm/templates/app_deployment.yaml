@@ -22,3 +22,5 @@ spec:
         name: {{ .Values.app }}
         ports:
           - containerPort: {{ .Values.test_app.port }}
+        imagePullSecrets:
+          - name: {{ .Values.test_app.imagePullSecretName }}

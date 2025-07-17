@@ -29,7 +29,14 @@ pipeline {
                   - /busybox/cat
                   tty: true
                 - name: helm
+                  workingDir: /tmp/jenkins
                   image: alpine/helm:3.18.3
+                  command:
+                    - cat
+                  tty: true
+                - name: devops
+                  workingDir: /tmp/jenkins
+                  image: papanin123/aws-cli-kubectl-helm:latest
                   command:
                     - cat
                   tty: true
@@ -43,6 +50,16 @@ pipeline {
           container(name: 'kaniko', shell: '/busybox/sh') {
               sh '''#!/busybox/sh
               /kaniko/executor --dockerfile=Dockerfile --context=/tmp/jenkins/workspace/app-cloud --destination=$AWS_ECR_REPOSITORY_URI:$IMAGE_TAG --verbosity debug
+              '''
+          }
+        }
+        steps {
+          container(name: 'devops', shell: '/bin/bash') {
+              sh '''#!/bin/bash
+              helm version
+              aws --version
+              kubectl version --client
+              docker --version
               '''
           }
         }

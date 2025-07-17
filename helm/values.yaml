@@ -8,3 +8,4 @@ test_app:
   replicas: 1
   port: 80
   targetPort: 8080
+  imagePullSecretName: regcred
