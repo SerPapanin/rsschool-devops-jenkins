@@ -61,8 +61,7 @@ pipeline {
               kubectl version --client
               docker --version
               '''
-          }
+            }
         }
-      }
     }
 }
