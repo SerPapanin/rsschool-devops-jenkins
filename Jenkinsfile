@@ -10,9 +10,9 @@ pipeline {
             containers:
             - name: jnlp
               workingDir: /tmp/jenkins
-            - name: kaniko
+            - name: buildx
               workingDir: /tmp/jenkins
-              image: bitnami/kaniko:latest
+              image: papanin123/buildx:latest
               imagePullPolicy: Always
               command:
               - /busybox/cat
@@ -35,14 +35,21 @@ pipeline {
   }
 
   stages {
-    stage('Build and Push Docker Image') {
-        environment {
-          PATH = "/busybox:/kaniko:$PATH"
+    stage('Login to ECR') {
+      steps {
+        container('devops') {
+          sh '''
+            aws ecr get-login-password --region $AWS_REGION | docker login --username AWS --password-stdin $AWS_ECR_REPOSITORY_URI
+          '''
         }
+      }
+    }
+    stage('Build and Push Docker Image') {
         steps {
-          container(name: 'kaniko', shell: '/busybox/sh') {
-              sh '''#!/busybox/sh
-              /kaniko/executor --dockerfile=Dockerfile --context=/tmp/jenkins/workspace/app-cloud --destination=$AWS_ECR_REPOSITORY_URI:$IMAGE_TAG --verbosity debug
+          container(name: 'buildx', shell: '/busybox/sh') {
+              sh '''
+                docker buildx create --use || true
+                docker buildx build --platform linux/amd64 -t $AWS_ECR_REPOSITORY_URI:latest --push .
               '''
           }
         }
