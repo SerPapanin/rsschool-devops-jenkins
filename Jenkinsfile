@@ -1,5 +1,37 @@
 pipeline {
-  agent none
+  agent {
+    kubernetes {
+        yaml """
+            apiVersion: v1
+            kind: Pod
+            metadata:
+            name: kaniko
+            spec:
+            containers:
+            - name: jnlp
+                workingDir: /tmp/jenkins
+            - name: kaniko
+                workingDir: /tmp/jenkins
+                image: gcr.io/kaniko-project/executor:debug
+                imagePullPolicy: Always
+                command:
+                - /busybox/cat
+                tty: true
+            - name: helm
+                workingDir: /tmp/jenkins
+                image: alpine/helm:3.18.3
+                command:
+                - cat
+                tty: true
+            - name: devops
+                workingDir: /tmp/jenkins
+                image: papanin123/aws-cli-kubectl-helm:latest
+                command:
+                - cat
+                tty: true
+            """
+        }
+    }
   environment {
       AWS_REGION = 'us-east-1' // Replace with your AWS region
       AWS_ACCOUNT_ID = '837781915459' // Replace with your AWS Account ID
@@ -10,39 +42,6 @@ pipeline {
 
   stages {
     stage('Build and Push Docker Image') {
-      agent {
-        kubernetes {
-            yaml """
-              apiVersion: v1
-              kind: Pod
-              metadata:
-                name: kaniko
-              spec:
-                containers:
-                - name: jnlp
-                  workingDir: /tmp/jenkins
-                - name: kaniko
-                  workingDir: /tmp/jenkins
-                  image: gcr.io/kaniko-project/executor:debug
-                  imagePullPolicy: Always
-                  command:
-                  - /busybox/cat
-                  tty: true
-                - name: helm
-                  workingDir: /tmp/jenkins
-                  image: alpine/helm:3.18.3
-                  command:
-                    - cat
-                  tty: true
-                - name: devops
-                  workingDir: /tmp/jenkins
-                  image: papanin123/aws-cli-kubectl-helm:latest
-                  command:
-                    - cat
-                  tty: true
-            """
-          }
-        }
         environment {
           PATH = "/busybox:/kaniko:$PATH"
         }
@@ -53,6 +52,8 @@ pipeline {
               '''
           }
         }
+    }
+    stage('Deploy App to K3s cluster') {
         steps {
           container(name: 'devops', shell: '/bin/bash') {
               sh '''#!/bin/bash
