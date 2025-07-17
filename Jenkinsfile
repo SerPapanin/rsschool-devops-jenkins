@@ -30,8 +30,8 @@ pipeline {
                 - cat
                 tty: true
             """
-        }
     }
+  }
   environment {
       AWS_REGION = 'us-east-1' // Replace with your AWS region
       AWS_ACCOUNT_ID = '837781915459' // Replace with your AWS Account ID
@@ -65,4 +65,5 @@ pipeline {
             }
         }
     }
+  }
 }
