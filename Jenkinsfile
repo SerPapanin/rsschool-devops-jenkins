@@ -12,16 +12,10 @@ pipeline {
               workingDir: /tmp/jenkins
             - name: kaniko
               workingDir: /tmp/jenkins
-              image: gcr.io/kaniko-project/executor:debug
+              image: bitnami/kaniko:latest
               imagePullPolicy: Always
               command:
               - /busybox/cat
-              tty: true
-            - name: helm
-              workingDir: /tmp/jenkins
-              image: alpine/helm:3.18.3
-              command:
-              - cat
               tty: true
             - name: devops
               workingDir: /tmp/jenkins
