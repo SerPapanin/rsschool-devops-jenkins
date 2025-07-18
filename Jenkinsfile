@@ -59,7 +59,7 @@ pipeline {
                 containers:
                 - name: devops
                   workingDir: /tmp/jenkins
-                  image: amazon/aws-cli:2.15.3
+                  image: papanin123/aws-cli-kubectl-helm:latest
                   command:
                   - sleep
                   args:
