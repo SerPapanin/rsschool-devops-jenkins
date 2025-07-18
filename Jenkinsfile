@@ -5,7 +5,7 @@ pipeline {
       AWS_ACCOUNT_ID = '837781915459' // Replace with your AWS Account ID
       AWS_ECR_REPOSITORY_NAME = 'rs-school/app-cloud' // Replace with your ECR repository name
       IMAGE_TAG = 'latest' // Replace with your desired image tag
-      AWS_ECR_REPOSITORY_URI = "${env.AWS_ACCOUNT_ID}.dkr.ecr.${env.AWS_REGION}.amazonaws.com/${env.AWS_ECR_REPOSITORY_NAME}"
+      ECR_URI = "${env.AWS_ACCOUNT_ID}.dkr.ecr.${env.AWS_REGION}.amazonaws.com/${env.AWS_ECR_REPOSITORY_NAME}"
   }
 
   stages {
@@ -42,41 +42,54 @@ pipeline {
         steps {
           container(name: 'kaniko', shell: '/busybox/sh') {
               sh '''#!/busybox/sh
-              /kaniko/executor --dockerfile=Dockerfile --context=/tmp/jenkins/workspace/app-cloud --destination=$AWS_ECR_REPOSITORY_URI:$IMAGE_TAG
+              /kaniko/executor --dockerfile=Dockerfile --context=/tmp/jenkins/workspace/app-cloud --destination=$ECR_URI:$IMAGE_TAG
               '''
           }
         }
       }
-    stage('Deploy App to K3s cluster') {
-      agent {
-        kubernetes {
-            yaml """
-              apiVersion: v1
-              kind: Pod
-              metadata:
-                name: devops
-              spec:
-                containers:
-                - name: devops
-                  workingDir: /tmp/jenkins
-                  image: papanin123/aws-cli-kubectl-helm:latest
-                  command:
-                  - sleep
-                  args:
-                  - infinity
-            """
+    stage('Create ImagePullSecret from ECR') {
+       agent {
+         kubernetes {
+             yaml """
+               apiVersion: v1
+               kind: Pod
+               metadata:
+                 name: awscli
+               spec:
+                - name: awscli
+                image: amazon/aws-cli:2.27.54
+                command: ['cat']
+                tty: true
+                - name: kubectl
+                image: bitnami/kubectl:latest
+                command: ['cat']
+                tty: true
+             """
+         }
+       }
+       steps {
+        container('awscli') {
+          script {
+            def password = sh(
+              script: "aws ecr get-login-password --region $AWS_REGION",
+              returnStdout: true
+            ).trim()
+          }
         }
-      }
-      steps {
-        container(name: 'devops', shell: '/bin/bash') {
-            sh '''#!/bin/bash
-            helm version
-            aws --version
-            kubectl version --client
-            docker --version
-            '''
+        steps{
+          container('kubectl') {
+            script {
+              sh """
+                kubectl delete secret regcred --ignore-not-found
+                kubectl create secret docker-registry regcred \
+                  --docker-server=${ECR_URI} \
+                  --docker-username=AWS \
+                  --docker-password='${password}' \
+                  --docker-email=panin.tut@gmail.com
+              """
+            }
+          }
         }
-      }
     }
   }
 }
