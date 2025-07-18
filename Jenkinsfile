@@ -1,32 +1,5 @@
 pipeline {
-  agent {
-    kubernetes {
-      yaml """
-        apiVersion: v1
-        kind: Pod
-        spec:
-        containers:
-        - name: jnlp
-          image: jenkins/inbound-agent
-          workingDir: /home/jenkins/agent
-        - name: buildx
-          image: papanin123/buildx:latest
-          workingDir: /workspace
-          command:
-          - /busybox/cat
-          tty: true
-        - name: deploy
-          image: amazon/aws-cli:2.15.3
-          workingDir: /workspace
-          command:
-          - sleep
-          args:
-          - infinity
-          env:
-          - name: AWS_REGION
-            value: us-east-1
-        """
-    }
+  agent none
   }
 
   environment {
@@ -46,48 +19,67 @@ pipeline {
       }
     }
 
-    stage('Build & Push Image') {
-      steps {
-        container('buildx') {
-          script {
-            sh '''
-              export DOCKER_CLI_EXPERIMENTAL=enabled
-              aws ecr get-login-password --region $AWS_REGION | docker login --username AWS --password-stdin $ECR_REPO_URI
-              docker buildx build --platform linux/amd64 \
-                -t $ECR_REPO:$IMAGE_TAG \
-                --push .
-            '''
+  stages {
+    stage('Build and Push Docker Image') {
+      agent {
+        kubernetes {
+            yaml """
+              apiVersion: v1
+              kind: Pod
+              metadata:
+                name: kaniko
+              spec:
+                containers:
+                - name: jnlp
+                  workingDir: /tmp/jenkins
+                - name: kaniko
+                  workingDir: /tmp/jenkins
+                  image: gcr.io/kaniko-project/executor:debug
+                  imagePullPolicy: Always
+                  command:
+                  - /busybox/cat
+                  tty: true
+            """
+          }
+        }
+        environment {
+          PATH = "/busybox:/kaniko:$PATH"
+        }
+        steps {
+          container(name: 'kaniko', shell: '/busybox/sh') {
+              sh '''#!/busybox/sh
+              /kaniko/executor --dockerfile=Dockerfile --context=/tmp/jenkins/workspace/app-cloud --destination=$ECR_REPO_URI:$IMAGE_TAG --verbosity debug
+              '''
           }
         }
       }
-    }
-
-    stage('Create K8s Secret for ECR') {
-      steps {
-        container('deploy') {
-          script {
-            sh '''
-              aws ecr get-login-password --region $AWS_REGION | \
-              kubectl create secret docker-registry regcred \
-                --docker-server=$ECR_REPO_URI \
-                --docker-username=AWS \
-                --docker-password-stdin \
-                --dry-run=client -o yaml | kubectl apply -f -
-            '''
-          }
+    stage('Deploy') {
+      agent {
+        kubernetes {
+            yaml """
+            apiVersion: v1
+            kind: Pod
+            spec:
+              containers:
+              - name: helm
+                image: jakexks/kubectl-helm-aws:latest
+                command: ["cat"]
+                tty: true
+            """
         }
       }
-    }
-
-    stage('Deploy with Helm') {
       steps {
-        container('deploy') {
-          sh '''
-            helm upgrade --install my-app ./chart \
-              --set image.repository=$ECR_REPO_URI \
-              --set image.tag=$IMAGE_TAG \
-              --set image.pullSecrets[0].name=regcred
-          '''
+        container('helm') {
+          withCredentials([file(credentialsId: 'k3s-config', variable: 'KUBECONFIG')]) {
+            sh '''
+            aws ecr get-login-password --region AWS_REGION | docker login --username AWS --password-stdin ${env.AWS_ACCOUNT_ID}.dkr.ecr.${env.AWS_REGION}.amazonaws.com
+            helm upgrade --install word-cloud-generator ./helm/ \\
+                        --set image.repository=${ECR_REPO_URI} \\
+                        --set image.tag=${IMAGE_TAG} \\
+                        -f ./helm/values.yaml \\
+                        --namespace word-cloud
+            '''
+          }
         }
       }
     }
