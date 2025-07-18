@@ -17,7 +17,6 @@ pipeline {
       }
     }
 
-  stages {
     stage('Build and Push Docker Image') {
       agent {
         kubernetes {
@@ -50,7 +49,7 @@ pipeline {
               '''
           }
         }
-      }
+    }
     stage('Deploy') {
       agent {
         kubernetes {
@@ -81,5 +80,4 @@ pipeline {
         }
       }
     }
-  }
 }
