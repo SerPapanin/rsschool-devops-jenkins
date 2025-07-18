@@ -78,11 +78,11 @@ pipeline {
       steps {
         container('devops') {
                     sh '''
-                        aws ecr get-login-password --region ${AWS_REGION} | kubectl create secret docker-registry ecr-secret \
+                        kubectl create secret docker-registry ecr-secret \
                             --docker-server=${ECR_SERVER_NAME} \
                             --docker-username=AWS \
-                            --docker-password-stdin \
-                            --namespace jenkins || echo "Secret already exists"
+                            --docker-password="$(aws ecr get-login-password --region ${AWS_REGION})" \
+                            --namespace jenkins
                     '''
         }
       }
