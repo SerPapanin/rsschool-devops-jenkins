@@ -7,6 +7,7 @@ pipeline {
     IMAGE_TAG = 'latest'
     ECR_URI = "${AWS_ACCOUNT_ID}.dkr.ecr.${AWS_REGION}.amazonaws.com/${AWS_ECR_REPOSITORY_NAME}"
     ECR_SERVER_NAME = "${AWS_ACCOUNT_ID}.dkr.ecr.${AWS_REGION}.amazonaws.com"
+    AWS_ECR_PASSWORD = ''
   }
 
   stages {
@@ -70,10 +71,11 @@ pipeline {
         script {
           def password = ''
           container('awscli') {
-            password = sh(
+            env.AWS_ECR_PASSWORD = sh(
             script: "aws ecr get-login-password --region $AWS_REGION",
             returnStdout: true
             ).trim()
+            cat ${env.AWS_ECR_PASSWORD}
           }
 
           container('kubectl') {
@@ -82,7 +84,7 @@ pipeline {
                 kubectl create secret docker-registry regcred \
                 --docker-server=${ECR_SERVER_NAME} \
                 --docker-username=AWS \
-                --docker-password='${password}' \
+                --docker-password='${AWS_ECR_PASSWORD}' \
                 --docker-email=panin.tut@gmail.com \
                 --debug=true
             """
