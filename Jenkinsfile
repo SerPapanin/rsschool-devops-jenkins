@@ -48,49 +48,45 @@ pipeline {
       }
     }
 
-    stage('Create ImagePullSecret from ECR') {
+    stage('Create ECR Secret') {
       agent {
         kubernetes {
           yaml """
             apiVersion: v1
             kind: Pod
+            metadata:
+              name: devops
             spec:
               containers:
-              - name: awscli
-                image: amazon/aws-cli:2.27.54
-                command: ['cat']
+              - name: devops
+                workingDir: /tmp/jenkins
+                image: papanin123/aws-cli-kubectl
+                resources:
+                  requests:
+                    memory: "1Gi"
+                    cpu: "1"
+                  limits:
+                    memory: "2Gi"
+                    cpu: "2"
+                imagePullPolicy: Always
+                command:
+                - sleep
                 tty: true
-              - name: kubectl
-                image: bitnami/kubectl:latest
-                command: ['cat']
-                tty: true
-            """
+          """
         }
       }
       steps {
-        script {
-          def password = ''
-          container('awscli') {
-            env.AWS_ECR_PASSWORD = sh(
-            script: "aws ecr get-login-password --region $AWS_REGION",
-            returnStdout: true
-            ).trim()
-            cat ${env.AWS_ECR_PASSWORD}
-          }
-
-          container('kubectl') {
-            sh """
-                kubectl delete secret regcred --ignore-not-found
-                kubectl create secret docker-registry regcred \
-                --docker-server=${ECR_SERVER_NAME} \
-                --docker-username=AWS \
-                --docker-password='${AWS_ECR_PASSWORD}' \
-                --docker-email=panin.tut@gmail.com \
-                --debug=true
-            """
-          }
+        container('devops') {
+                    sh '''
+                        aws ecr get-login-password --region ${AWS_REGION} | kubectl create secret docker-registry ecr-secret \
+                            --docker-server=${ECR_SERVER_NAME} \
+                            --docker-username=AWS \
+                            --docker-password-stdin \
+                            --namespace jenkins || echo "Secret already exists"
+                    '''
+                }
+            }
         }
       }
     }
-  }
 }
