@@ -39,12 +39,12 @@ pipeline {
       }
       environment {
           PATH = "/busybox:/kaniko:$PATH"
-        }
+      }
       steps {
         container(name: 'kaniko', shell: '/busybox/sh') {
-            sh '''#!/busybox/sh
-            /kaniko/executor --dockerfile=Dockerfile --context=/tmp/jenkins/workspace/app-cloud --destination=$ECR_URI:$IMAGE_TAG
-            '''
+          sh '''#!/busybox/sh
+          /kaniko/executor --dockerfile=Dockerfile --context=/tmp/jenkins/workspace/app-cloud --destination=$ECR_URI:$IMAGE_TAG
+          '''
         }
       }
     }
