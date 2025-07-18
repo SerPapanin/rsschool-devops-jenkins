@@ -16,6 +16,8 @@ pipeline {
           yaml """
             apiVersion: v1
             kind: Pod
+            metadata:
+              name: kaniko
             spec:
             containers:
             - name: jnlp
