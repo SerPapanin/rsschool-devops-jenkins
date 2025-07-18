@@ -6,6 +6,7 @@ pipeline {
     AWS_ECR_REPOSITORY_NAME = 'rs-school/app-cloud'
     IMAGE_TAG = 'latest'
     ECR_URI = "${AWS_ACCOUNT_ID}.dkr.ecr.${AWS_REGION}.amazonaws.com/${AWS_ECR_REPOSITORY_NAME}"
+    ECR_SERVER_NAME = "${AWS_ACCOUNT_ID}.dkr.ecr.${AWS_REGION}.amazonaws.com"
   }
 
   stages {
@@ -79,10 +80,11 @@ pipeline {
             sh """
                 kubectl delete secret regcred --ignore-not-found
                 kubectl create secret docker-registry regcred \
-                --docker-server=${ECR_URI} \
+                --docker-server=${ECR_SERVER_NAME} \
                 --docker-username=AWS \
                 --docker-password='${password}' \
-                --docker-email=panin.tut@gmail.com
+                --docker-email=panin.tut@gmail.com \
+                --debug=true
             """
           }
         }
