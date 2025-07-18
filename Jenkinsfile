@@ -67,12 +67,9 @@ pipeline {
       }
       steps {
         container('awscli') {
-          script {
-            env.AWS_ECR_PASSWORD = sh(
-              script: "aws ecr get-login-password --region $AWS_REGION --debug",
-              returnStdout: true
-            ).trim()
-          }
+          sh"""
+             aws ecr get-login-password --region $AWS_REGION
+          """
         }
 
         container('kubectl') {
