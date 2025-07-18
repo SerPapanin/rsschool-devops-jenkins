@@ -42,10 +42,41 @@ pipeline {
         steps {
           container(name: 'kaniko', shell: '/busybox/sh') {
               sh '''#!/busybox/sh
-              /kaniko/executor --dockerfile=Dockerfile --context=/tmp/jenkins/workspace/app-cloud --destination=$AWS_ECR_REPOSITORY_URI:$IMAGE_TAG --verbosity debug
+              /kaniko/executor --dockerfile=Dockerfile --context=/tmp/jenkins/workspace/app-cloud --destination=$AWS_ECR_REPOSITORY_URI:$IMAGE_TAG
               '''
           }
         }
       }
+    stage('Deploy App to K3s cluster') {
+      agent {
+        kubernetes {
+            yaml """
+              apiVersion: v1
+              kind: Pod
+              metadata:
+                name: devops
+              spec:
+                containers:
+                - name: devops
+                  workingDir: /tmp/jenkins
+                  image: amazon/aws-cli:2.15.3
+                  command:
+                  - sleep
+                  args:
+                  - infinity
+            """
+        }
+      }
+      steps {
+        container(name: 'devops', shell: '/bin/bash') {
+            sh '''#!/bin/bash
+            helm version
+            aws --version
+            kubectl version --client
+            docker --version
+            '''
+        }
+      }
     }
+  }
 }
