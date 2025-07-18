@@ -84,9 +84,8 @@ pipeline {
                             --docker-password-stdin \
                             --namespace jenkins || echo "Secret already exists"
                     '''
-                }
-            }
         }
       }
     }
+  }
 }
