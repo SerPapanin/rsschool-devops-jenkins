@@ -18,20 +18,20 @@ pipeline {
             kind: Pod
             spec:
             containers:
-                - name: jnlp
-                workingDir: /tmp/jenkins
-                - name: kaniko
-                workingDir: /tmp/jenkins
-                image: gcr.io/kaniko-project/executor:debug
-                imagePullPolicy: Always
-                command:
-                    - /busybox/cat
-                tty: true
-                - name: helm
-                image: alpine/helm:3.18.3
-                command:
-                    - cat
-                tty: true
+            - name: jnlp
+              workingDir: /tmp/jenkins
+            - name: kaniko
+              workingDir: /tmp/jenkins
+              image: gcr.io/kaniko-project/executor:debug
+              imagePullPolicy: Always
+              command:
+              - /busybox/cat
+              tty: true
+            - name: helm
+              image: alpine/helm:3.18.3
+              command:
+              - cat
+              tty: true
             """
         }
       }
@@ -58,14 +58,14 @@ pipeline {
             kind: Pod
             spec:
             containers:
-                - name: awscli
-                image: amazon/aws-cli:2.27.54
-                command: ['cat']
-                tty: true
-                - name: kubectl
-                image: bitnami/kubectl:latest
-                command: ['cat']
-                tty: true
+            - name: awscli
+              image: amazon/aws-cli:2.27.54
+              command: ['cat']
+              tty: true
+            - name: kubectl
+              image: bitnami/kubectl:latest
+              command: ['cat']
+              tty: true
             """
         }
       }
