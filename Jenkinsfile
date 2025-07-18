@@ -81,7 +81,7 @@ pipeline {
                 kubectl create secret docker-registry regcred \
                 --docker-server=${ECR_URI} \
                 --docker-username=AWS \
-                --docker-password='${AWS_ECR_PASSWORD}' \
+                --docker-password='${password}' \
                 --docker-email=panin.tut@gmail.com
             """
           }
