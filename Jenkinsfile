@@ -66,21 +66,25 @@ pipeline {
         }
       }
       steps {
-        container('awscli') {
-          sh"""
-             aws ecr get-login-password --region $AWS_REGION
-          """
-        }
+        script {
+          def password = ''
+          container('awscli') {
+            password = sh(
+            script: "aws ecr get-login-password --region $AWS_REGION",
+            returnStdout: true
+            ).trim()
+          }
 
-        container('kubectl') {
-          sh """
-            kubectl delete secret regcred --ignore-not-found
-            kubectl create secret docker-registry regcred \
-              --docker-server=${ECR_URI} \
-              --docker-username=AWS \
-              --docker-password='${AWS_ECR_PASSWORD}' \
-              --docker-email=panin.tut@gmail.com
-          """
+          container('kubectl') {
+            sh """
+                kubectl delete secret regcred --ignore-not-found
+                kubectl create secret docker-registry regcred \
+                --docker-server=${ECR_URI} \
+                --docker-username=AWS \
+                --docker-password='${AWS_ECR_PASSWORD}' \
+                --docker-email=panin.tut@gmail.com
+            """
+          }
         }
       }
     }
