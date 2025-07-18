@@ -18,17 +18,17 @@ pipeline {
             metadata:
               name: kaniko
             spec:
-            containers:
-            - name: jnlp
-              workingDir: /tmp/jenkins
-            - name: kaniko
-              workingDir: /tmp/jenkins
-              image: gcr.io/kaniko-project/executor:debug
-              imagePullPolicy: Always
-              command:
-              - /busybox/cat
-              tty: true
-            """
+              containers:
+              - name: jnlp
+                workingDir: /tmp/jenkins
+              - name: kaniko
+                workingDir: /tmp/jenkins
+                image: gcr.io/kaniko-project/executor:debug
+                imagePullPolicy: Always
+                command:
+                - /busybox/cat
+                tty: true
+          """
         }
       }
       environment {
@@ -53,15 +53,15 @@ pipeline {
             apiVersion: v1
             kind: Pod
             spec:
-            containers:
-            - name: awscli
-              image: amazon/aws-cli:2.27.54
-              command: ['cat']
-              tty: true
-            - name: kubectl
-              image: bitnami/kubectl:latest
-              command: ['cat']
-              tty: true
+              containers:
+              - name: awscli
+                image: amazon/aws-cli:2.27.54
+                command: ['cat']
+                tty: true
+              - name: kubectl
+                image: bitnami/kubectl:latest
+                command: ['cat']
+                tty: true
             """
         }
       }
