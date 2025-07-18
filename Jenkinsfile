@@ -16,18 +16,18 @@ pipeline {
             apiVersion: v1
             kind: Pod
             metadata:
-            name: kaniko
+              name: kaniko
             spec:
             containers:
             - name: jnlp
-                workingDir: /tmp/jenkins
+              workingDir: /tmp/jenkins
             - name: kaniko
-                workingDir: /tmp/jenkins
-                image: gcr.io/kaniko-project/executor:debug
-                imagePullPolicy: Always
-                command:
-                - /busybox/cat
-                tty: true
+              workingDir: /tmp/jenkins
+              image: gcr.io/kaniko-project/executor:debug
+              imagePullPolicy: Always
+              command:
+              - /busybox/cat
+              tty: true
             """
         }
       }
