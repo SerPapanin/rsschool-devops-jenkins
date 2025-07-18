@@ -36,20 +36,21 @@ pipeline {
             """
           }
         }
-        environment {
+      }
+      environment {
           PATH = "/busybox:/kaniko:$PATH"
         }
-        steps {
-          container(name: 'kaniko', shell: '/busybox/sh') {
-              sh '''#!/busybox/sh
-              /kaniko/executor --dockerfile=Dockerfile --context=/tmp/jenkins/workspace/app-cloud --destination=$ECR_URI:$IMAGE_TAG
-              '''
-          }
+      steps {
+        container(name: 'kaniko', shell: '/busybox/sh') {
+            sh '''#!/busybox/sh
+            /kaniko/executor --dockerfile=Dockerfile --context=/tmp/jenkins/workspace/app-cloud --destination=$ECR_URI:$IMAGE_TAG
+            '''
         }
       }
+    }
     stage('Create ImagePullSecret from ECR') {
-       agent {
-         kubernetes {
+      agent {
+        kubernetes {
              yaml """
                apiVersion: v1
                kind: Pod
@@ -65,9 +66,9 @@ pipeline {
                 command: ['cat']
                 tty: true
              """
-         }
-       }
-       steps {
+        }
+      }
+      steps {
         container('awscli') {
           script {
             def password = sh(
@@ -76,9 +77,10 @@ pipeline {
             ).trim()
           }
         }
-        steps{
-          container('kubectl') {
-            script {
+      }
+      steps {
+        container('kubectl') {
+          script {
               sh """
                 kubectl delete secret regcred --ignore-not-found
                 kubectl create secret docker-registry regcred \
@@ -87,9 +89,9 @@ pipeline {
                   --docker-password='${password}' \
                   --docker-email=panin.tut@gmail.com
               """
-            }
           }
         }
+      }
     }
   }
 }
