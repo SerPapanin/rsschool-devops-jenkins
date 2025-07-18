@@ -70,7 +70,7 @@ pipeline {
                     cpu: "2"
                 imagePullPolicy: Always
                 command:
-                - sleep
+                - cat
                 tty: true
           """
         }
