@@ -17,10 +17,10 @@ spec:
       labels:
         app: {{ .Values.app }}
     spec:
+      imagePullSecrets:
+      - name: {{ .Values.test_app.imagePullSecretName }}
       containers:
       - image: {{ .Values.test_app.image.repository }}:{{ .Values.test_app.image.tag }}
         name: {{ .Values.app }}
         ports:
           - containerPort: {{ .Values.test_app.port }}
-        imagePullSecrets:
-          - name: {{ .Values.test_app.imagePullSecretName }}
