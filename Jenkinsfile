@@ -57,8 +57,8 @@ pipeline {
             metadata:
               name: devops
             spec:
+              serviceAccountName: jenkins-job
               containers:
-                serviceAccountName: jenkins-job
               - name: devops
                 workingDir: /tmp/jenkins
                 image: papanin123/aws-cli-kubectl:v3
