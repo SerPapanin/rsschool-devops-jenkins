@@ -8,6 +8,7 @@ pipeline {
     ECR_URI = "${AWS_ACCOUNT_ID}.dkr.ecr.${AWS_REGION}.amazonaws.com/${AWS_ECR_REPOSITORY_NAME}"
     ECR_SERVER_NAME = "${AWS_ACCOUNT_ID}.dkr.ecr.${AWS_REGION}.amazonaws.com"
     AWS_ECR_PASSWORD = ''
+    APP_NAMESPACE = "flask-app"
   }
 
   stages {
@@ -83,7 +84,7 @@ pipeline {
               --docker-server=${ECR_SERVER_NAME} \
               --docker-username=AWS \
               --docker-password="$(aws ecr get-login-password --region ${AWS_REGION})" \
-              --namespace jenkins \
+              --namespace ${APP_NAMESPACE} \
               --dry-run=client -o yaml | kubectl apply -f -
           '''
         }
@@ -113,7 +114,7 @@ pipeline {
         container('helm') {
           withCredentials([file(credentialsId: 'k3s-config', variable: 'KUBECONFIG')]) {
             sh '''
-                helm upgrade --install flask-app ./helm -n jenkins --set namespace=jenkins
+                helm upgrade --install flask-app ./helm -n ${APP_NAMESPACE} --set namespace=${APP_NAMESPACE}
             '''
           }
         }
