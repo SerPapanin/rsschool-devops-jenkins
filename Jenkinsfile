@@ -113,7 +113,7 @@ pipeline {
         container('helm') {
           withCredentials([file(credentialsId: 'k3s-config', variable: 'KUBECONFIG')]) {
             sh '''
-                helm upgrade --install flask-app ./helm -n jenkins
+                helm upgrade --install flask-app ./helm -n jenkins --set namespace=jenkins
             '''
           }
         }
