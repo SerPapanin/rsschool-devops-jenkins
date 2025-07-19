@@ -82,7 +82,7 @@ pipeline {
               --docker-server=${ECR_SERVER_NAME} \
               --docker-username=AWS \
               --docker-password="$(aws ecr get-login-password --region ${AWS_REGION})" \
-              --serviceAccount=jenkins-job \
+              --serviceaccount=jenkins-job \
               --namespace jenkins \
               --dry-run=client -o yaml | kubectl apply -f -
           '''
