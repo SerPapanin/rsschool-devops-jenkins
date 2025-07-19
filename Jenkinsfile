@@ -58,6 +58,7 @@ pipeline {
               name: devops
             spec:
               containers:
+                serviceAccountName: jenkins-job
               - name: devops
                 workingDir: /tmp/jenkins
                 image: papanin123/aws-cli-kubectl:v3
@@ -82,7 +83,6 @@ pipeline {
               --docker-server=${ECR_SERVER_NAME} \
               --docker-username=AWS \
               --docker-password="$(aws ecr get-login-password --region ${AWS_REGION})" \
-              --serviceaccount=jenkins-job \
               --namespace jenkins \
               --dry-run=client -o yaml | kubectl apply -f -
           '''
