@@ -14,7 +14,7 @@ pipeline {
     stage('Build and Push Docker Image') {
       agent {
         kubernetes {
-          yaml """
+          yaml '''
             apiVersion: v1
             kind: Pod
             metadata:
@@ -30,7 +30,7 @@ pipeline {
                 command:
                 - /busybox/cat
                 tty: true
-          """
+          '''
         }
       }
       environment {
@@ -51,7 +51,7 @@ pipeline {
     stage('Create ECR Secret') {
       agent {
         kubernetes {
-          yaml """
+          yaml '''
             apiVersion: v1
             kind: Pod
             metadata:
@@ -60,7 +60,7 @@ pipeline {
               containers:
               - name: devops
                 workingDir: /tmp/jenkins
-                image: papanin123/aws-cli-kubectl
+                image: papanin123/aws-cli-kubectl:v3
                 resources:
                   requests:
                     memory: "1Gi"
@@ -72,18 +72,48 @@ pipeline {
                 command:
                 - cat
                 tty: true
-          """
+          '''
         }
       }
       steps {
         container('devops') {
-                    sh '''
-                        kubectl create secret docker-registry ecr-secret \
-                            --docker-server=${ECR_SERVER_NAME} \
-                            --docker-username=AWS \
-                            --docker-password="$(aws ecr get-login-password --region ${AWS_REGION})" \
-                            --namespace jenkins
-                    '''
+          sh '''
+            kubectl create secret docker-registry ecr-secret \
+              --docker-server=${ECR_SERVER_NAME} \
+              --docker-username=AWS \
+              --docker-password="$(aws ecr get-login-password --region ${AWS_REGION})" \
+              --namespace jenkins
+          '''
+        }
+      }
+    }
+    stage('Deploy to K3S cluster') {
+      agent {
+        kubernetes {
+          yaml '''
+            apiVersion: v1
+            kind: Pod
+            metadata:
+              name: devops
+            spec:
+              containers:
+              - name: helm
+                workingDir: /tmp/jenkins
+                image: alpine/helm:3.18.0
+                command:
+                - sleep
+                args:
+                - "infinity"
+          '''
+        }
+      }
+      steps {
+        container('helm') {
+          withCredentials([file(credentialsId: 'k3s-config', variable: 'KUBECONFIG')]) {
+            sh '''
+                helm upgrade --install flask-app ./helm -n jenkins
+            '''
+          }
         }
       }
     }
