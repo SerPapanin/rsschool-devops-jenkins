@@ -1,15 +1,15 @@
 apiVersion: v1
 kind: Service
 metadata:
-  name: { { .Values.app } }
-  namespace: { { .Values.namespace } }
+  name: {{ .Values.app }}
+  namespace: {{ .Values.namespace }}
   labels:
-    app: { { .Values.app } }
+    app: {{ .Values.app }}
 spec:
   ports:
     protocol: TCP
-    port: { { .Values.test_app.port } }
-    targetPort: { { .Values.test_app.TargetPort } }
+    port: {{ .Values.test_app.port }}
+    targetPort: {{ .Values.test_app.TargetPort }}
   selector:
-    app: { { .Values.app } }
+    app: {{ .Values.app }}
   type: ClusterIP
