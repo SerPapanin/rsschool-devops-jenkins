@@ -7,7 +7,7 @@ metadata:
     app: {{ .Values.app }}
 spec:
   ports:
-    protocol: TCP
+  - protocol: TCP
     port: {{ .Values.test_app.port }}
     targetPort: {{ .Values.test_app.TargetPort }}
   selector:
