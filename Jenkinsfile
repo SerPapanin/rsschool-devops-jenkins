@@ -39,6 +39,12 @@ pipeline {
             - sleep
             args:
             - "infinity"
+          - name: sonar
+            image: sonarsource/sonar-scanner-cli:11.3
+            command:
+            - sleep
+            args:
+            - 99d
       '''
     }
   }
@@ -69,7 +75,25 @@ pipeline {
         }
       }
     }
-
+    stage('SonarQube Code Scan') {
+        steps {
+            container('sonar') {
+                withSonarQubeEnv('SonarQube') {
+                    sh '''
+                    sonar-scanner \
+                        -Dsonar.projectKey=$SONAR_PROJECT_KEY \
+                        -Dsonar.sources=./rs-school_app/src \
+                        -Dsonar.host.url=$SONAR_HOST_URL \
+                        -Dsonar.login=$SONAR_AUTH_TOKEN \
+                        -Dsonar.javascript.lcov.reportPaths=./rs-school_app/coverage/lcov.info
+                    '''
+                }
+            }
+            script {
+                    echo 'SonarQube analysis completed successfully!'
+            }
+        }
+    }
     stage('Create ECR Secret') {
       steps {
         container('devops') {
@@ -95,5 +119,41 @@ pipeline {
         }
       }
     }
+    stage('Smoke test') {
+      steps {
+        container('devops') {
+          withCredentials([file(credentialsId: 'k3s-config', variable: 'KUBECONFIG')]) {
+            sh '''
+                kubectl get pods -n ${APP_NAMESPACE} -l app=flask-app -o jsonpath='{.items[0].metadata.name}' | xargs kubectl logs -n ${APP_NAMESPACE}
+                curl -s -o /dev/null -w "%{http_code}" --resolve flask-app.panin.lab:80:10.1.6.225 http://flask-app.panin.lab/
+            '''
+          }
+        }
+      }
+    }
   }
+  post {
+      success {
+          script {
+              mail to: 'panin.tut@gmail.com',
+                   subject: "SUCCESS: ${env.JOB_NAME} #${env.BUILD_NUMBER}",
+                   body: """
+                   Build #${env.BUILD_NUMBER} of job '${env.JOB_NAME}' was successful.
+
+                   View the details here: ${env.BUILD_URL}
+                   """
+          }
+      }
+      failure {
+          script {
+              mail to: 'panin.tut@gmail.com',
+                   subject: "FAILURE: ${env.JOB_NAME} #${env.BUILD_NUMBER}",
+                   body: """
+                   Build #${env.BUILD_NUMBER} of job '${env.JOB_NAME}' failed.
+
+                   View the details here: ${env.BUILD_URL}
+                   """
+          }
+      }
+    }
 }

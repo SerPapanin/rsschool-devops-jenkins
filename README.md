@@ -1,48 +1,65 @@
-## Task 5 documentation
+# Task 6: Application Deployment via Jenkins Pipeline
 
-Application docker image build and push to ECR private repository by Jenkins job
+The pipeline is designed to automate the build, test, and deployment phases, ensuring a reliable and repeatable deployment process.
 
-### Application deployment to K3S by using Helm.
+## Prerequisites
+1. Jenkins Setup:
 
-## Prepare the Cluster
-1. **Create Namespace:**
+- Jenkins server with required plugins:
+    - Pipeline
+    - Kubernetes
+    - Email Extension or Mailer (for notifications)
+    - Git
+    - SonarQube
+- Jenkins nodes configured with necessary tools (e.g., Docker, Node.js).
+2. SonarQube:
 
-    ```bash
-    kubectl create namespace test
-    ```
-2. **Create secret for ECR authentication.**
+- Need to insyall and configure SonarQube server.
+- Need to create a project in SonarQube for the application.
+3. Deployment Environment:
 
-    ```bash
-    kubectl create secret docker-registry regcred \
-            --docker-server=https://<your-ecr-url> \
-            --docker-username=<your-ecr-username> \
-            --docker-password=<your-ecr-password> \
-            --docker-email=<your-email>
-    ```
-3. **Deploy Application using Helm**
+- Kubernetes cluster or K3S or minikube.
+4. Credentials:
 
-    ```bash
-    helm upgrade --install flask-app ./helm
-    ```
+- AWS role attached to Jenkins host to access AWS ECR repository.
+- Kubernetes access credentials.
+- SMTP server credentials for email notifications.
 
-2. **Verify WordPress installation:**
+## Pipeline Overview
+The Jenkins pipeline includes the following stages:
 
-    ```bash
-    kubectl get pods -n test
-    kubectl get deployments -n test
-    kubectl get services -n test
-    ```
-    Ensure all pods are running.
+1. Clone Repository:
 
-3. **Visit Application in the browser**
-    Application exposed by traefik ingress controller on k3S cluster and nginx reverse proxy on Bastion host that forwards traffic to the application.
+- Fetch the latest code from the repository.
+2. Docker Image Build:
 
-    Due absent public domain name need to add to your hosts file this text:
-    ```
-    <bastionhostIP> flask-app.panin.lab
-    ```
-    # for HTTP
-    http://flask-app.panin.lab
-    ![image](https://raw.githubusercontent.com/SerPapanin/rsschool-devops-jenkins/refs/heads/main/screenshots/http_access.png)
+- Install dependencies and build docker image.
+- Push docker image to ECR registry.
+4. Static Code Analysis:
 
-## Clean Up
+- Use tools like SonarQube to analyze code quality and enforce standards.
+5. Deploy to Kubernetes:
+
+- Use Helm to deploy the application to a Kubernetes cluster.
+- Update existing deployments or create new ones.
+
+6. Notifications:
+
+- Send email notifications on success or failure.
+
+## How to Use
+1. Configure Jenkins Job:
+
+- Create a Jenkins job and choose "Pipeline" as the job type.
+- Add the link to a Jenkinsfile in your repository.
+2. Set Up Kubernetes and Jenkins:
+
+- Ensure your Kubernetes cluster is accessible.
+- Create Jenkins credentials for Kubernetes access and SonarQube access.
+3. Test the Pipeline:
+
+- Run the pipeline to ensure it works as expected.
+- Monitor logs for any errors during the build or deployment.
+4. Deploy Application:
+
+- Trigger the pipeline manually or set up automatic triggers (e.g., webhooks).
