@@ -1,5 +1,47 @@
 pipeline {
-  agent none
+  agent {
+    kubernetes {
+      yaml '''
+        apiVersion: v1
+        kind: Pod
+        metadata:
+          name: service_pod
+        spec:
+          serviceAccountName: jenkins-job
+          containers:
+          - name: jnlp
+            workingDir: /tmp/jenkins
+          - name: kaniko
+            workingDir: /tmp/jenkins
+            image: gcr.io/kaniko-project/executor:debug
+            imagePullPolicy: Always
+            command:
+            - /busybox/cat
+            tty: true
+          - name: devops
+            workingDir: /tmp/jenkins
+            image: papanin123/aws-cli-kubectl:v3
+            resources:
+            requests:
+                memory: "1Gi"
+                cpu: "1"
+            limits:
+                memory: "2Gi"
+                cpu: "2"
+            imagePullPolicy: Always
+            command:
+            - cat
+            tty: true
+          - name: helm
+            workingDir: /tmp/jenkins
+            image: alpine/helm:3.18.0
+            command:
+            - sleep
+            args:
+            - "infinity"
+      '''
+    }
+  }
   environment {
     AWS_REGION = 'us-east-1'
     AWS_ACCOUNT_ID = '837781915459'
@@ -13,27 +55,6 @@ pipeline {
 
   stages {
     stage('Build and Push Docker Image') {
-      agent {
-        kubernetes {
-          yaml '''
-            apiVersion: v1
-            kind: Pod
-            metadata:
-              name: kaniko
-            spec:
-              containers:
-              - name: jnlp
-                workingDir: /tmp/jenkins
-              - name: kaniko
-                workingDir: /tmp/jenkins
-                image: gcr.io/kaniko-project/executor:debug
-                imagePullPolicy: Always
-                command:
-                - /busybox/cat
-                tty: true
-          '''
-        }
-      }
       environment {
         PATH = "/busybox:/kaniko:$PATH"
       }
@@ -50,33 +71,6 @@ pipeline {
     }
 
     stage('Create ECR Secret') {
-      agent {
-        kubernetes {
-          yaml '''
-            apiVersion: v1
-            kind: Pod
-            metadata:
-              name: devops
-            spec:
-              serviceAccountName: jenkins-job
-              containers:
-              - name: devops
-                workingDir: /tmp/jenkins
-                image: papanin123/aws-cli-kubectl:v3
-                resources:
-                  requests:
-                    memory: "1Gi"
-                    cpu: "1"
-                  limits:
-                    memory: "2Gi"
-                    cpu: "2"
-                imagePullPolicy: Always
-                command:
-                - cat
-                tty: true
-          '''
-        }
-      }
       steps {
         container('devops') {
           sh '''
@@ -91,25 +85,6 @@ pipeline {
       }
     }
     stage('Deploy to K3S cluster') {
-      agent {
-        kubernetes {
-          yaml '''
-            apiVersion: v1
-            kind: Pod
-            metadata:
-              name: devops
-            spec:
-              containers:
-              - name: helm
-                workingDir: /tmp/jenkins
-                image: alpine/helm:3.18.0
-                command:
-                - sleep
-                args:
-                - "infinity"
-          '''
-        }
-      }
       steps {
         container('helm') {
           withCredentials([file(credentialsId: 'k3s-config', variable: 'KUBECONFIG')]) {
