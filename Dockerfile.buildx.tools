@@ -1,0 +1,13 @@
+FROM docker:28.3-cli
+
+# Install curl, git (optional), bash
+RUN apk add --no-cache bash curl git
+
+# Install buildx plugin manually
+ENV DOCKER_BUILDX_VERSION=v0.25.0
+
+RUN mkdir -p ~/.docker/cli-plugins && \
+    curl -SL "https://github.com/docker/buildx/releases/download/${DOCKER_BUILDX_VERSION}/buildx-${DOCKER_BUILDX_VERSION}.linux-amd64" -o ~/.docker/cli-plugins/docker-buildx && \
+    chmod +x ~/.docker/cli-plugins/docker-buildx
+
+ENTRYPOINT ["docker"]
