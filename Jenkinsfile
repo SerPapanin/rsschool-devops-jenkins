@@ -61,7 +61,7 @@ pipeline {
   stages {
     stage('Test') {
       steps {
-          container('docker') {
+          container('devops') {
               sh '''
               kubectl version
               aws --version
