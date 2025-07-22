@@ -53,7 +53,7 @@ pipeline {
     APP_NAMESPACE = "flask-app"
     SONAR_PROJECT_KEY = "rs-school-app"
     SONAR_HOST_URL = "http://sonarqube-sonarqube.jenkins.svc.cluster.local:9000"
-    #SONAR_AUTH_TOKEN = credentials('sonar-auth-token')
+    // SONAR_AUTH_TOKEN = credentials('sonar-auth-token')
   }
 
   stages {
