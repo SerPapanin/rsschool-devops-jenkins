@@ -61,7 +61,9 @@ pipeline {
     SONAR_HOST_URL = "http://sonarqube-sonarqube.jenkins.svc.cluster.local:9000"
     SONAR_AUTH_TOKEN = credentials('sonar-auth-token')
   }
-
+  parameters {
+      booleanParam(name: 'PUSH_TO_ECR', defaultValue: false, description: 'Do you want to push the Docker image to ECR?')
+  }
   stages {
     stage('Test') {
       steps {
@@ -107,6 +109,9 @@ pipeline {
       }
     }
     stage('Build and Push Docker Image') {
+      when {
+        expression { params.PUSH_TO_ECR }
+      }
       environment {
         PATH = "/busybox:/kaniko:$PATH"
       }
