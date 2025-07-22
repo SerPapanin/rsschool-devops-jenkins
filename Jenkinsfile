@@ -39,12 +39,6 @@ pipeline {
             - sleep
             args:
             - "infinity"
-          - name: sonar
-            image: sonarsource/sonar-scanner-cli:11.3
-            command:
-            - sleep
-            args:
-            - 99d
       '''
     }
   }
@@ -78,25 +72,7 @@ pipeline {
         }
       }
     }
-    stage('SonarQube Code Scan') {
-        steps {
-            container('sonar') {
-                withSonarQubeEnv('SonarQube') {
-                    sh '''
-                    sonar-scanner \
-                        -Dsonar.projectKey=$SONAR_PROJECT_KEY \
-                        -Dsonar.sources=./rs-school_app/src \
-                        -Dsonar.host.url=$SONAR_HOST_URL \
-                        -Dsonar.login=$SONAR_AUTH_TOKEN \
-                        -Dsonar.javascript.lcov.reportPaths=./rs-school_app/coverage/lcov.info
-                    '''
-                }
-            }
-            script {
-                    echo 'SonarQube analysis completed successfully!'
-            }
-        }
-    }
+
     stage('Create ECR Secret') {
       steps {
         container('devops') {
