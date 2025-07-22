@@ -63,18 +63,13 @@ pipeline {
   }
 
   stages {
-    stage('Build and Push Docker Image') {
-      environment {
-        PATH = "/busybox:/kaniko:$PATH"
-      }
+    stage('Test') {
       steps {
-        container(name: 'kaniko', shell: '/busybox/sh') {
-          sh '''
-            /kaniko/executor \
-              --dockerfile=Dockerfile \
-              --context=/tmp/jenkins/workspace/app-cloud \
-              --destination=$ECR_URI:$IMAGE_TAG
-          '''
+        container('devops') {
+            sh '''
+            kubectl version
+            aws --version
+            '''
         }
       }
     }
@@ -107,6 +102,21 @@ pipeline {
               --docker-password="$(aws ecr get-login-password --region ${AWS_REGION})" \
               --namespace ${APP_NAMESPACE} \
               --dry-run=client -o yaml | kubectl apply -f -
+          '''
+        }
+      }
+    }
+    stage('Build and Push Docker Image') {
+      environment {
+        PATH = "/busybox:/kaniko:$PATH"
+      }
+      steps {
+        container(name: 'kaniko', shell: '/busybox/sh') {
+          sh '''
+            /kaniko/executor \
+              --dockerfile=Dockerfile \
+              --context=/tmp/jenkins/workspace/app-cloud \
+              --destination=$ECR_URI:$IMAGE_TAG
           '''
         }
       }
