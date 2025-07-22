@@ -55,21 +55,18 @@ pipeline {
     SONAR_HOST_URL = "http://sonarqube-sonarqube.jenkins.svc.cluster.local:9000"
     // SONAR_AUTH_TOKEN = credentials('sonar-auth-token')
   }
-
+  parameters {
+      booleanParam(name: 'PUSH_TO_ECR', defaultValue: false, description: 'Do you want to push the Docker image to ECR?')
+  }
   stages {
-    stage('Build and Push Docker Image') {
-      environment {
-        PATH = "/busybox:/kaniko:$PATH"
-      }
+    stage('Test') {
       steps {
-        container(name: 'kaniko', shell: '/busybox/sh') {
-          sh '''
-            /kaniko/executor \
-              --dockerfile=Dockerfile \
-              --context=/tmp/jenkins/workspace/app-cloud \
-              --destination=$ECR_URI:$IMAGE_TAG
-          '''
-        }
+          container('docker') {
+              sh '''
+              kubectl version
+              aws --version
+              '''
+          }
       }
     }
     stage('SonarQube Analysis') {
@@ -88,6 +85,22 @@ pipeline {
               --docker-password="$(aws ecr get-login-password --region ${AWS_REGION})" \
               --namespace ${APP_NAMESPACE} \
               --dry-run=client -o yaml | kubectl apply -f -
+          '''
+        }
+      }
+    }
+    stage('Build and Push Docker Image') {
+      when { expression { params.PUSH_TO_ECR == true } }
+      environment {
+        PATH = "/busybox:/kaniko:$PATH"
+      }
+      steps {
+        container(name: 'kaniko', shell: '/busybox/sh') {
+          sh '''
+            /kaniko/executor \
+              --dockerfile=Dockerfile \
+              --context=/tmp/jenkins/workspace/app-cloud \
+              --destination=$ECR_URI:$IMAGE_TAG
           '''
         }
       }
