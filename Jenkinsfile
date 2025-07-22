@@ -72,7 +72,12 @@ pipeline {
         }
       }
     }
-
+    stage('SonarQube Analysis') {
+        steps {
+            echo "Skipping SonarQube analysis for demonstration purposes"
+            echo "In a real environment, this would run SonarQube analysis"
+        }
+    }
     stage('Create ECR Secret') {
       steps {
         container('devops') {
