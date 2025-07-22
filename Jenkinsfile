@@ -76,10 +76,9 @@ pipeline {
                     sh '''
                     sonar-scanner \
                         -Dsonar.projectKey=$SONAR_PROJECT_KEY \
-                        -Dsonar.sources=./rs-school_app/src \
+                        -Dsonar.sources=src \
                         -Dsonar.host.url=$SONAR_HOST_URL \
-                        -Dsonar.login=$SONAR_AUTH_TOKEN \
-                        -Dsonar.javascript.lcov.reportPaths=./rs-school_app/coverage/lcov.info
+                        -Dsonar.login=$SONAR_AUTH_TOKEN
                     '''
                 }
             }
