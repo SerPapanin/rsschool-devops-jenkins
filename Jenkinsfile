@@ -51,7 +51,7 @@ pipeline {
     ECR_SERVER_NAME = "${AWS_ACCOUNT_ID}.dkr.ecr.${AWS_REGION}.amazonaws.com"
     AWS_ECR_PASSWORD = ''
     APP_NAMESPACE = "flask-app"
-    SONAR_PROJECT_KEY = "rs-school-app"
+    SONAR_PROJECT_KEY = "rs-school_app"
     SONAR_HOST_URL = "http://sonarqube-sonarqube.jenkins.svc.cluster.local:9000"
     SONAR_AUTH_TOKEN = credentials('sonar-auth-token')
   }
