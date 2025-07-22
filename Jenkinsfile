@@ -53,7 +53,7 @@ pipeline {
     APP_NAMESPACE = "flask-app"
     SONAR_PROJECT_KEY = "rs-school-app"
     SONAR_HOST_URL = "http://sonarqube-sonarqube.jenkins.svc.cluster.local:9000"
-    // SONAR_AUTH_TOKEN = credentials('sonar-auth-token')
+    SONAR_AUTH_TOKEN = credentials('sonar-auth-token')
   }
   parameters {
       booleanParam(name: 'PUSH_TO_ECR', defaultValue: false, description: 'Do you want to push the Docker image to ECR?')
@@ -69,10 +69,23 @@ pipeline {
           }
       }
     }
-    stage('SonarQube Analysis') {
+    stage('SonarQube Code Scan') {
         steps {
-            echo "Skipping SonarQube analysis for demonstration purposes"
-            echo "In a real environment, this would run SonarQube analysis"
+            container('sonar') {
+                withSonarQubeEnv('SonarQube') {
+                    sh '''
+                    sonar-scanner \
+                        -Dsonar.projectKey=$SONAR_PROJECT_KEY \
+                        -Dsonar.sources=./rs-school_app/src \
+                        -Dsonar.host.url=$SONAR_HOST_URL \
+                        -Dsonar.login=$SONAR_AUTH_TOKEN \
+                        -Dsonar.javascript.lcov.reportPaths=./rs-school_app/coverage/lcov.info
+                    '''
+                }
+            }
+            script {
+                    echo 'SonarQube analysis completed successfully!'
+            }
         }
     }
     stage('Create ECR Secret') {
