@@ -39,6 +39,14 @@ pipeline {
             - sleep
             args:
             - "infinity"
+          - name: sonar
+            image: sonarsource/sonar-scanner-cli:latest
+            command:
+            - sleep
+            - infinity
+            volumes:
+            - name: tmp-volume
+              emptyDir: {}
       '''
     }
   }
