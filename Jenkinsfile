@@ -81,7 +81,7 @@ pipeline {
     stage('SonarQube Code Scan') {
         steps {
             container('sonar') {
-                withSonarQubeEnv('SonarQube') {
+                withSonarQubeEnv() {
                     sh '''
                     sonar-scanner \
                         -Dsonar.organization=${SONAR_ORGANIZATION} \
