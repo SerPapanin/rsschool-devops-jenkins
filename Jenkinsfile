@@ -97,6 +97,10 @@ pipeline {
               --docker-password="$(aws ecr get-login-password --region ${AWS_REGION})" \
               --namespace ${APP_NAMESPACE} \
               --dry-run=client -o yaml | kubectl apply -f -
+            '''
+        }
+      }
+    }
     stage('Build and Push Docker Image') {
       when { expression { p.PUSH_TO_ECR == true } }
       environment {
