@@ -54,6 +54,7 @@ pipeline {
     SONAR_PROJECT_KEY = "rs-school_app"
     SONAR_HOST_URL = "http://sonarqube-sonarqube.jenkins.svc.cluster.local:9000"
     SONAR_AUTH_TOKEN = credentials('sonar-auth-token')
+    SONAR_ORGANIZATION = 'serpapanin'
   }
   parameters {
       booleanParam(name: 'PUSH_TO_ECR', defaultValue: false, description: 'Do you want to push the Docker image to ECR?')
@@ -75,10 +76,9 @@ pipeline {
                 withSonarQubeEnv('SonarQube') {
                     sh '''
                     sonar-scanner \
-                        -Dsonar.projectKey=$SONAR_PROJECT_KEY \
-                        -Dsonar.sources=src \
-                        -Dsonar.host.url=$SONAR_HOST_URL \
-                        -Dsonar.login=$SONAR_AUTH_TOKEN
+                        -Dsonar.organization=${SONAR_ORGANIZATION} \
+                        -Dsonar.projectKey=${SONAR_PROJECT_KEY} \
+                        -Dsonar.sources=app
                     '''
                 }
             }
@@ -97,12 +97,8 @@ pipeline {
               --docker-password="$(aws ecr get-login-password --region ${AWS_REGION})" \
               --namespace ${APP_NAMESPACE} \
               --dry-run=client -o yaml | kubectl apply -f -
-          '''
-        }
-      }
-    }
     stage('Build and Push Docker Image') {
-      when { expression { params.PUSH_TO_ECR == true } }
+      when { expression { p.PUSH_TO_ECR == true } }
       environment {
         PATH = "/busybox:/kaniko:$PATH"
       }
