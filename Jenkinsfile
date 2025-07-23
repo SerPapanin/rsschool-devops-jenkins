@@ -102,7 +102,7 @@ pipeline {
       }
     }
     stage('Build and Push Docker Image') {
-      when { expression { p.PUSH_TO_ECR == true } }
+      when { expression { params.PUSH_TO_ECR == true } }
       environment {
         PATH = "/busybox:/kaniko:$PATH"
       }
